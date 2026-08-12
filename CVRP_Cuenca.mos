@@ -1,0 +1,94 @@
+model CVRP_Cuenca
+uses "mmxprs"
+
+declarations
+    n: integer
+    K: integer
+    Q: real
+end-declarations
+
+initializations from "CVRP_Cuenca.txt"
+    n K Q
+end-initializations
+
+declarations
+    N    = 0..n          ! Todos los nodos
+    C    = 1..n          ! solo clientes
+    Kset = 1..K          ! conjunto de vehiculos
+
+    q: array(C)    of real   ! demanda en kg
+    c: array(N, N) of real   ! distancias en km
+
+    ! Variables de decision
+    x: array(N, N, Kset) of mpvar   ! x(i,j,k)=1 si vehiculo k viaja de i a j
+    y: array(C, Kset)    of mpvar   ! y(i,k)=1 si vehiculo k atiende cliente i
+    z: array(Kset)       of mpvar   ! z(k)=1 si vehiculo k es utilizado
+
+    !variable auxiliar para eliminar subtours
+    u: array(C, Kset) of mpvar      ! orden de visita del cliente i en ruta k
+end-declarations
+
+initializations from "CVRP_Cuenca.txt"
+    q c
+end-initializations
+
+!naturaleza de las variables
+forall(i in N, j in N, k in Kset | i <> j) x(i,j,k) is_binary
+forall(i in C, k in Kset)                   y(i,k)   is_binary
+forall(k in Kset)                            z(k)     is_binary
+
+! Funcion objetivo: minimizar distancia total recorrida
+Z := sum(k in Kset, i in N, j in N | i <> j) c(i,j) * x(i,j,k)
+
+! Restricciones
+! (R1) Cada cliente debe ser atendido exactamente una vez
+forall(i in C)
+    sum(k in Kset) y(i,k) = 1
+
+! (R2) Si vehiculo k atiende cliente i, debe ENTRAR a ese nodo exactamente una vez
+forall(i in C, k in Kset)
+    sum(j in N | i <> j) x(j,i,k) = y(i,k)
+
+! (R3) Si vehiculo k atiende cliente i, debe SALIR de ese nodo exactamente una vez
+forall(i in C, k in Kset)
+    sum(j in N | i <> j) x(i,j,k) = y(i,k)
+
+! (R4) Cada vehiculo utilizado sale del deposito exactamente una vez
+forall(k in Kset)
+    sum(j in C) x(0,j,k) = z(k)
+
+! (R5) Cada vehiculo utilizado regresa al deposito exactamente una vez
+forall(k in Kset)
+    sum(i in C) x(i,0,k) = z(k)
+
+! (R6) La carga total de cada vehiculo no supera su capacidad
+forall(k in Kset)
+    sum(i in C) q(i) * y(i,k) <= Q * z(k)
+
+! (R7) Eliminacion de subtours (MTZ): aplica solo entre clientes
+forall(i in C, j in C, k in Kset | i <> j)
+    u(i,k) - u(j,k) + n * x(i,j,k) <= n - 1
+
+! (R8) Acotamiento de u: si vehiculo k visita i entonces 1 <= u(i,k) <= n
+forall(i in C, k in Kset) do
+    u(i,k) >= y(i,k)
+    u(i,k) <= n * y(i,k)
+end-do
+minimize(Z)
+writeln("Recoleccion de basura en Cuenca")
+writeln("Distancia total recorrida (km): ", getobjval)
+writeln("")
+
+forall(k in Kset | getsol(z(k)) > 0.5) do
+    writeln("Vehiculo ", k)
+    forall(i in N, j in N | i <> j and getsol(x(i,j,k)) > 0.5)
+        writeln("  Arco: ", i, " = ", j)
+    writeln("")
+end-do
+
+writeln("Clientes atendidos por vehiculo:")
+forall(k in Kset, i in C | getsol(y(i,k)) > 0.5)
+    writeln("Cliente ", i, " - Vehiculo ", k, "  (demanda: ", q(i), " kg)")
+
+end-model
+
