@@ -1,8 +1,8 @@
-# Optimización de Rutas de Recolección de Basura — Cuenca, Ecuador
+# Optimización de Rutas de Recolección de Basura 
 
-Modelo de optimización para diseñar las rutas más eficientes de una flotilla de 3 camiones recolectores de basura en Cuenca, Ecuador, en colaboración con la Empresa Pública Municipal de Aseo de Cuenca (EMAC EP).
+Modelo de optimización para diseñar las rutas más eficientes de una flotilla de 3 camiones recolectores de basura en una ciudad.
 
-Proyecto desarrollado como parte del curso **MA2001B - Modelación con Programación Lineal**, Tecnológico de Monterrey.
+Proyecto desarrollado como parte del curso **MA2001B - Optimización Determinista**, Tecnológico de Monterrey.
 
 ## Problema
 
@@ -22,8 +22,8 @@ Ruta óptima final de **14.67 km**, distribuida entre los 3 camiones:
 | 3 | 685.49 kg |
 
 ## Estructura del repositorio
-- CVRP_Cuenca.mos # Modelo original en FICO Xpress
-- CVRP_Cuenca.txt # Modelo en formato de texto
+- CVRP.mos # Modelo original en FICO Xpress
+- CVRP.txt # Modelo en formato de texto
 - PROBLEMA_TEC.xlsx # Datos de la instancia (matriz de distancias y demandas)
 - leer_instancia.py # Lectura y validación de los datos de entrada
 - modelo.py # Formulación del modelo CVRP en Pyomo
