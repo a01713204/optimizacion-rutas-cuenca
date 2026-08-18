@@ -1,4 +1,4 @@
-model CVRP_Cuenca
+model CVRP
 uses "mmxprs"
 
 declarations
@@ -7,7 +7,7 @@ declarations
     Q: real
 end-declarations
 
-initializations from "CVRP_Cuenca.txt"
+initializations from "CVRP.txt"
     n K Q
 end-initializations
 
@@ -28,7 +28,7 @@ declarations
     u: array(C, Kset) of mpvar      ! orden de visita del cliente i en ruta k
 end-declarations
 
-initializations from "CVRP_Cuenca.txt"
+initializations from "CVRP.txt"
     q c
 end-initializations
 
